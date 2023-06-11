@@ -61,6 +61,20 @@ async function connectDB() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+
+    // updating user role as admin
+
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
   } finally {
     // client.close();
   }
