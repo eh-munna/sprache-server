@@ -3,6 +3,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 // dotenv
@@ -42,6 +43,16 @@ async function connectDB() {
 
     // collections
     const usersCollection = spracheDB.collection('usersCollection');
+
+    // jwt creating
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: '1h',
+      });
+      res.send({ token });
+    });
 
     // get users
     app.get('/users', async (req, res) => {
