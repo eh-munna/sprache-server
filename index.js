@@ -69,7 +69,21 @@ async function connectDB() {
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
-          role: 'admin',
+          adminRole: true,
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // updating user role as instructor
+
+    app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          instructorRole: true,
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
