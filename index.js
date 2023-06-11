@@ -43,6 +43,12 @@ async function connectDB() {
     // collections
     const usersCollection = spracheDB.collection('usersCollection');
 
+    // get users
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
     // creating and adding users
 
     app.post('/users', async (req, res) => {
@@ -50,7 +56,7 @@ async function connectDB() {
       const query = { email: user.email };
       const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
-        return res.send({ message: 'User already exists' });
+        return res.send({ message: 'User already exist' });
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
