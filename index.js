@@ -14,6 +14,24 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
+// verifying jwt token
+
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'Invalid access' });
+  }
+  const token = authorization.split(' ')[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'Invalid access' });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.0lo6seg.mongodb.net/?retryWrites=true&w=majority`;
@@ -43,6 +61,7 @@ async function connectDB() {
 
     // collections
     const usersCollection = spracheDB.collection('usersCollection');
+    const classCollection = spracheDB.collection('classCollection');
 
     // jwt creating
 
@@ -55,7 +74,7 @@ async function connectDB() {
     });
 
     // get users
-    app.get('/users', async (req, res) => {
+    app.get('/users', verifyJWT, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
