@@ -73,8 +73,20 @@ async function connectDB() {
       res.send({ token });
     });
 
+    // verifying admin
+
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (!user?.adminRole) {
+        return res.status(403).send({ error: true, message: 'Invalid access' });
+      }
+      next();
+    };
+
     // get users
-    app.get('/users', verifyJWT, async (req, res) => {
+    app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
