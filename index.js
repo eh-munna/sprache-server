@@ -85,6 +85,24 @@ async function connectDB() {
       next();
     };
 
+    // get all the classes
+
+    app.get('/classes', async (req, res) => {
+      const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get popular classes based on enrolled students
+
+    app.get('/popular', async (req, res) => {
+      const result = await classCollection
+        .find()
+        .sort({ enrolledStudents: -1 })
+        .limit(6)
+        .toArray();
+      res.send(result);
+    });
+
     // get users
     app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
