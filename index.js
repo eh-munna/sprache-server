@@ -79,6 +79,18 @@ async function connectDB() {
       res.send(result);
     });
 
+    // get admin based on email
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        return res.send({ admin: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.adminRole === true };
+      res.send(result);
+    });
+
     // creating and adding users
 
     app.post('/users', async (req, res) => {
