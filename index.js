@@ -62,6 +62,7 @@ async function connectDB() {
     // collections
     const usersCollection = spracheDB.collection('usersCollection');
     const classCollection = spracheDB.collection('classCollection');
+    const bookClassCollection = spracheDB.collection('bookClassCollection');
 
     // jwt creating
 
@@ -148,6 +149,22 @@ async function connectDB() {
       res.send(result);
     });
 
+    // get single user from database
+
+    // app.get('/users/user/:email', async (req, res) => {
+    //   const user = req.params.email;
+    //   const query = { email: user };
+    //   const result = await usersCollection.findOne(query);
+    //   res.send(result);
+    // });
+
+    app.get('/user/:email', async (req, res) => {
+      const user = req.params.email;
+      const query = { email: user };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
     // updating user role as instructor
 
     app.patch('/users/instructor/:id', async (req, res) => {
@@ -159,6 +176,14 @@ async function connectDB() {
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // store booked course into the database
+
+    app.post('/booked', async (req, res) => {
+      const course = req.body;
+      const result = await bookClassCollection.insertOne(course);
       res.send(result);
     });
   } finally {
