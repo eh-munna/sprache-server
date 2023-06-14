@@ -149,6 +149,29 @@ async function connectDB() {
       res.send(result);
     });
 
+    // updating user role as instructor
+
+    app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          instructorRole: true,
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.get('/users/instructor/:email', verifyJWT async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        return res.send({ instructor: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { instructor: user?.instructorRole === true };
+      res.send(result);
+    });
     // get single user from database
 
     // app.get('/users/user/:email', async (req, res) => {
@@ -165,21 +188,26 @@ async function connectDB() {
       res.send(result);
     });
 
-    // updating user role as instructor
+    // store booked course into the database
 
-    app.patch('/users/instructor/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          instructorRole: true,
-        },
-      };
-      const result = await usersCollection.updateOne(filter, updateDoc);
+    app.get('/booked', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await bookClassCollection.find(query).toArray();
       res.send(result);
     });
-
-    // store booked course into the database
+    app.get('/users', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
 
     app.post('/booked', async (req, res) => {
       const course = req.body;
