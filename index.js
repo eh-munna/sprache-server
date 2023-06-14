@@ -112,7 +112,7 @@ async function connectDB() {
 
     // get admin based on email
     app.get('/users/admin/:email', verifyJWT, async (req, res) => {
-      const email = req.params.email;
+      const email = req.params?.email;
       if (req.decoded.email !== email) {
         return res.send({ admin: false });
       }
@@ -165,7 +165,7 @@ async function connectDB() {
       res.send(result);
     });
     app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
-      const email = req.params.email;
+      const email = req.params?.email;
       if (req.decoded.email !== email) {
         return res.send({ instructor: false });
       }
@@ -177,7 +177,7 @@ async function connectDB() {
 
     // get all instructors
 
-    app.get('/instructors', verifyJWT, async (req, res) => {
+    app.get('/instructors', async (req, res) => {
       const query = { instructorRole: true };
       const result = await usersCollection.find(query).toArray();
       res.send(result);
