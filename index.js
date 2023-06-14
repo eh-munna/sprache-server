@@ -153,16 +153,18 @@ async function connectDB() {
 
     app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
+      const email = req.body.email;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           instructorRole: true,
+          instructorEmail: email,
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
-    app.get('/users/instructor/:email', verifyJWT async (req, res) => {
+    app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       if (req.decoded.email !== email) {
         return res.send({ instructor: false });
@@ -172,18 +174,17 @@ async function connectDB() {
       const result = { instructor: user?.instructorRole === true };
       res.send(result);
     });
-    // get single user from database
 
-    // app.get('/users/user/:email', async (req, res) => {
-    //   const user = req.params.email;
-    //   const query = { email: user };
-    //   const result = await usersCollection.findOne(query);
-    //   res.send(result);
-    // });
+    // get all instructors
 
-    app.get('/user/:email', async (req, res) => {
-      const user = req.params.email;
-      const query = { email: user };
+    app.get('/instructors', verifyJWT, async (req, res) => {
+      const query = { instructorRole: true };
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get('/get-instructor/:email', verifyJWT, async (req, res) => {
+      const query = { instructorRole: true };
       const result = await usersCollection.findOne(query);
       res.send(result);
     });
