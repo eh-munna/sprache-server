@@ -188,6 +188,20 @@ async function connectDB() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     });
+    app.get('/instructor-class/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const query = { instructorEmail: email };
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // add new class
+
+    app.post('/add-class', async (req, res) => {
+      const course = req.body;
+      const result = await classCollection.insertOne(course);
+      res.send(result);
+    });
 
     // store booked course into the database
 
