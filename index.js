@@ -263,7 +263,7 @@ async function connectDB() {
       res.send(result);
     });
 
-    app.get('/enrolled', async (req, res) => {
+    app.get('/enrolled', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
@@ -273,12 +273,29 @@ async function connectDB() {
       res.send(result);
     });
 
-    // app.get('/delete-book/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { bookedId: id };
-    //   const result = await bookClassCollection.findOne(filter);
-    //   res.send(result);
-    // });
+    app.patch('/reduce-seat/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $inc: {
+          availableSeats: -1,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.patch('/increase-enroll/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $inc: {
+          enrolledStudents: 1,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
   } finally {
     // client.close();
   }
