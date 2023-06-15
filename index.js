@@ -96,11 +96,17 @@ async function connectDB() {
       res.send(result);
     });
 
+    app.get('/all-classes', async (req, res) => {
+      const query = { status: 'approved' };
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // get popular classes based on enrolled students
 
     app.get('/popular', async (req, res) => {
       const result = await classCollection
-        .find()
+        .find({ status: 'approved' })
         .sort({ enrolledStudents: -1 })
         .limit(6)
         .toArray();
@@ -296,6 +302,23 @@ async function connectDB() {
       }
       const query = { studentEmail: email };
       const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get payment history
+
+    app.get('/payment-history', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+
+      const query = { studentEmail: email };
+      const result = await paymentCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+
       res.send(result);
     });
 
