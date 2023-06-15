@@ -212,6 +212,8 @@ async function connectDB() {
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+
+    // get instructor
     app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params?.email;
       if (req.decoded.email !== email) {
