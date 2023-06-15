@@ -159,7 +159,7 @@ async function connectDB() {
     });
 
     // updating class status
-    app.patch('/approve/:id', async (req, res) => {
+    app.patch('/approve/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -171,12 +171,26 @@ async function connectDB() {
       res.send(result);
     });
     // denying class status
-    app.patch('/deny/:id', async (req, res) => {
+    app.patch('/deny/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           status: 'denied',
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // adding feedback
+    app.patch('/add-feedback/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const body = req.body.feedback;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          feedback: body,
         },
       };
       const result = await classCollection.updateOne(filter, updateDoc);
