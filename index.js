@@ -4,10 +4,12 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const stripe = require('stripe')(process.env.PAYMENT_KEY);
+
 const port = process.env.PORT || 5000;
 
 // dotenv
-require('dotenv').config();
 
 // middleware
 
@@ -137,7 +139,7 @@ async function connectDB() {
 
     // updating user role as admin
 
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch('/users/admin/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -214,6 +216,7 @@ async function connectDB() {
       const result = await bookClassCollection.find(query).toArray();
       res.send(result);
     });
+
     app.get('/users', async (req, res) => {
       const email = req.query.email;
       if (!email) {
@@ -228,6 +231,25 @@ async function connectDB() {
       const course = req.body;
       const result = await bookClassCollection.insertOne(course);
       res.send(result);
+    });
+
+    // payment intent
+
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const { price } = req.body;
+
+      const amount = price * 100;
+      console.log(amount);
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'eur',
+        payment_method_types: ['card'],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
   } finally {
     // client.close();
