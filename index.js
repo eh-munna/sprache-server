@@ -263,13 +263,13 @@ async function connectDB() {
       res.send(result);
     });
 
-    app.get('/enrolled', verifyJWT, async (req, res) => {
+    app.get('/enrolled', async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
       }
-      const query = { email: email };
-      const result = await bookClassCollection.find(query).toArray();
+      const query = { studentEmail: email };
+      const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
 
