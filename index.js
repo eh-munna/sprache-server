@@ -65,6 +65,7 @@ async function connectDB() {
     const usersCollection = spracheDB.collection('usersCollection');
     const classCollection = spracheDB.collection('classCollection');
     const bookClassCollection = spracheDB.collection('bookClassCollection');
+    const paymentCollection = spracheDB.collection('paymentCollection');
 
     // jwt creating
 
@@ -207,7 +208,7 @@ async function connectDB() {
 
     // store booked course into the database
 
-    app.get('/booked', async (req, res) => {
+    app.get('/booked', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
@@ -237,20 +238,47 @@ async function connectDB() {
 
     app.post('/create-payment-intent', verifyJWT, async (req, res) => {
       const { price } = req.body;
-
       const amount = price * 100;
-      console.log(amount);
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'eur',
         payment_method_types: ['card'],
       });
-
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      res.send(result);
+    });
+
+    app.delete('/delete-book/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { bookedId: id };
+      const result = await bookClassCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    app.get('/enrolled', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await bookClassCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // app.get('/delete-book/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { bookedId: id };
+    //   const result = await bookClassCollection.findOne(filter);
+    //   res.send(result);
+    // });
   } finally {
     // client.close();
   }
