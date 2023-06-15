@@ -194,7 +194,8 @@ async function connectDB() {
     app.get('/instructor-class/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { instructorEmail: email };
-      const result = await classCollection.find(query).toArray();
+      const projection = { status: 1 };
+      const result = await classCollection.find(query, projection).toArray();
       res.send(result);
     });
 
