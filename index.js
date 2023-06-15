@@ -152,6 +152,31 @@ async function connectDB() {
       res.send(result);
     });
 
+    // updating class status
+    app.patch('/approve/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'approved',
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    // denying class status
+    app.patch('/deny/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'denied',
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // updating user role as instructor
 
     app.patch('/users/instructor/:id', async (req, res) => {
