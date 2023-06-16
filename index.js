@@ -144,9 +144,11 @@ async function connectDB() {
       res.send(result);
     });
 
+    // admin apis...............
+
     // updating user role as admin
 
-    app.patch('/users/admin/:id', verifyJWT, async (req, res) => {
+    app.patch('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -159,7 +161,7 @@ async function connectDB() {
     });
 
     // updating class status
-    app.patch('/approve/:id', verifyJWT, async (req, res) => {
+    app.patch('/approve/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -171,7 +173,7 @@ async function connectDB() {
       res.send(result);
     });
     // denying class status
-    app.patch('/deny/:id', verifyJWT, async (req, res) => {
+    app.patch('/deny/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -184,7 +186,7 @@ async function connectDB() {
     });
 
     // adding feedback
-    app.patch('/add-feedback/:id', verifyJWT, async (req, res) => {
+    app.patch('/add-feedback/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const body = req.body.feedback;
       const filter = { _id: new ObjectId(id) };
@@ -199,21 +201,28 @@ async function connectDB() {
 
     // updating user role as instructor
 
-    app.patch('/users/instructor/:id', async (req, res) => {
-      const id = req.params.id;
-      const email = req.body.email;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          instructorRole: true,
-          instructorEmail: email,
-        },
-      };
-      const result = await usersCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+    app.patch(
+      '/users/instructor/:id',
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const email = req.body.email;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            instructorRole: true,
+            instructorEmail: email,
+          },
+        };
+        const result = await usersCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+    );
 
-    // get instructor
+    // instructor apis.............
+
+    // get single instructor
     app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params?.email;
       if (req.decoded.email !== email) {
@@ -238,6 +247,7 @@ async function connectDB() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     });
+
     app.get('/instructor-class/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const query = { instructorEmail: email };
@@ -246,8 +256,9 @@ async function connectDB() {
       res.send(result);
     });
 
-    // add new class
+    // class apis...................//
 
+    // add new class
     app.post('/add-class', async (req, res) => {
       const course = req.body;
       const result = await classCollection.insertOne(course);
